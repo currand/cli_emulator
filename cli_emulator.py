@@ -59,7 +59,7 @@ class Shell(cmd.Cmd):
     def do_create_item(self, args):
         'Create an item: create_item <item>'
         item = {
-            "name": args,
+            "name": args.strip(' \t\r\n'),
             "resources": []
         }
         items.append(args)
@@ -76,7 +76,7 @@ class Shell(cmd.Cmd):
             return False
 
         try:
-            items[key] = value
+            items[key] = value.strip(' \t\r\n')
             self.print_item(key)
         except IndexError:
             print("Error: Item does not exist")
@@ -102,7 +102,7 @@ class Shell(cmd.Cmd):
         'Create a resource: create_resource <item index>: <resource>\n (e.g. 3: resource1)'
         try:
             item, new_resource = args.split(':')
-            items[int(item)]['resources'].append(new_resource)
+            items[int(item)]['resources'].append(new_resource.strip(' \t\r\n'))
             print("OK")
         except IndexError:
             print("Error: Item does not exist")
@@ -126,7 +126,7 @@ class Shell(cmd.Cmd):
         'Update a resource: update_resource <item index>:<resource index>:<resource>\n (e.g. 3:2:bob)'
         try:
             item, resource, update = args.split(':')
-            items[int(item)]['resources'][int(resource)] = update
+            items[int(item)]['resources'][int(resource)] = update.strip(' \t\r\n')
             print("OK")
             self.print_resource(int(item), int(resource))
         except IndexError:
