@@ -62,7 +62,7 @@ class Shell(cmd.Cmd):
             "name": args.strip(' \t\r\n'),
             "resources": []
         }
-        items.append(args)
+        items.append(item)
         self.print_item('last')
 
     def do_update_item(self, args):
