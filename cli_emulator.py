@@ -1,3 +1,4 @@
+import future
 import cmd
 import sys
 import getpass
