@@ -51,7 +51,6 @@ class Shell(cmd.Cmd):
     def print_resource(self, item, resource):
         print("  " + str(item) + ": " + items[item]["resources"][resource])
 
-
     def do_list_items(self, args):
         'List items'
         self.print_items()
@@ -107,8 +106,7 @@ class Shell(cmd.Cmd):
         except IndexError:
             print("Error: Item does not exist")
         except (ValueError, TypeError):
-            print ('Create a resource: create_resource <item index>: <resource>\n (e.g. 3: resource1)')
-
+            print('Create a resource: create_resource <item index>: <resource>\n (e.g. 3: resource1)')
 
     def do_read_resource(self, args):
         'Read a resource: read_resource <item index>:<resource index>\n (e.g. 3:2)'
@@ -119,8 +117,7 @@ class Shell(cmd.Cmd):
         except IndexError:
             print("Error: Item does not exist")
         except (ValueError, TypeError):
-            print ('Create a resource: create_resource <item index>: <resource>\n (e.g. 3: resource1)')
-
+            print('Create a resource: create_resource <item index>: <resource>\n (e.g. 3: resource1)')
 
     def do_update_resource(self, args):
         'Update a resource: update_resource <item index>:<resource index>:<resource>\n (e.g. 3:2:bob)'
@@ -132,8 +129,7 @@ class Shell(cmd.Cmd):
         except IndexError:
             print("Error: Item or resource does not exist")
         except (ValueError, TypeError):
-            print ('Update a resource: update_resource <item index>:<resource index>:<resource>\n (e.g. 3:2:bob)')
-
+            print('Update a resource: update_resource <item index>:<resource index>:<resource>\n (e.g. 3:2:bob)')
 
     def do_delete_resource(self, args):
         'Delte a resource: delete_resource <item index>:<resource index>\n (e.g. 3:2)'
@@ -144,7 +140,7 @@ class Shell(cmd.Cmd):
         except IndexError:
             print("Error: Item or resource does not exist")
         except (ValueError, TypeError):
-            print ('Delete a resource: delete_resource <item index>:<resource index>\n (e.g. 3:2)')
+            print('Delete a resource: delete_resource <item index>:<resource index>\n (e.g. 3:2)')
 
     def do_list_resources(self, args):
         'List resources: list_resources <item index>'
@@ -153,14 +149,14 @@ class Shell(cmd.Cmd):
         except IndexError:
             print("Error: Item does not exist")
         except (ValueError, TypeError):
-            print ('Create a resource: create_resource <item index>: <resource>\n (e.g. 3: resource1)')
-
+            print('Create a resource: create_resource <item index>: <resource>\n (e.g. 3: resource1)')
 
     def do_show_device(self, args):
         "Show system info"
+        print("Hostname" + socket.gethostname())
         print("OS: " + platform.system())
         print("Release: " + platform.release())
-        print("Version: " + platform.version())
+        print("Version: Ubuntu 16.04 LTS")
         print("Machine: " + platform.machine())
         print("Processor: " + platform.processor())
 
