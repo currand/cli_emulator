@@ -104,37 +104,29 @@ class Shell(cmd.Cmd):
     prompt = getpass.getuser() + "@" + socket.gethostname() + "_fake$ "
     completekey = 'tab'
 
-    def update_xconnect_hash(self):
-        for xconnect in xconnects:
-            xconnect_hash[xconnect["source-int"]] = xconnect["dest-int"]
-            xconnect_hash[xconnect["dest-int"]] = xconnect["source-int"]
-
     def check_for_int(self, int):
         if int in interfaces.keys():
-            print("True")
             return True
 
         try:
             int, sub_int = int.split('.')
             if sub_int in interfaces[int]['sub_interfaces'].keys():
-                print("True")
                 return True
             else:
-                print("False")
                 return False
         except (ValueError, KeyError):
-            print("False")
             return False
 
     def do_create_xconnect(self, args):
-        'create_xconnect <source> <dest> <type>'
+        'create_xconnect <source> <dest> <type> <name>'
         try:
-            source, dest, type, name = args.split('\s+')
+            source, dest, type, name = args.split(None)
         except ValueError:
-            'create_xconnect <source> <dest> <type> <name>'
+            print('create_xconnect <source> <dest> <type> <name>')
+            return False
 
-        if not self.check_for_int(source) or self.check_for_int(dest):
-            if not ipadd_pattern.match(source) or not ipadd_pattern(dest):
+        if not self.check_for_int(source) or not self.check_for_int(dest):
+            if not ipadd_pattern.match(source) or not ipadd_pattern.match(dest):
                 print('source/destination must be valid interface or IP Address')
                 return False
 
@@ -148,8 +140,6 @@ class Shell(cmd.Cmd):
             "type": type
         }
 
-        self.update_xconnect_hash
-        print(name)
         return True
 
     def do_show_xconnects(self, args):
@@ -158,6 +148,13 @@ class Shell(cmd.Cmd):
 
         return True
 
+    def do_delete_xconnect(self,args):
+        'delete_xconnect <xconnect>'
+        if args in xconnects.keys():
+            xconnects.pop(args)
+        else:
+            print("xconnect does not exist")
+            return False
 
     def do_show_interface(self, args):
         'do_show_interface <interface>.[sub-interface]'
@@ -192,12 +189,124 @@ class Shell(cmd.Cmd):
 
         return True
 
+    def do_create_interface(self, args):
+        'create_interface <interface>.[sub-interface]'
+
+        if len(args) < 1:
+            print('create_interface <interface>.[sub-interface]')
+            return False
+
+        try:
+            int, sub_int = args.split('.')
+            if self.check_for_int(args):
+                print("Interface already exists")
+                return False
+
+            interfaces[int] = {
+                "description": "",
+                "sub_interfaces": {
+                    sub_int: {
+                        "description": "",
+                        "ip_address": "",
+                        "type": "",
+                        "vlan": 0,
+                        "proto_state": "down",
+                        "int_state": "down",
+                        "bandwidth": "1000M"
+                    }
+                }
+            }
+        except UnboundLocalError:
+            print("create_interface <interface>.[sub-interface]")
+            return False
+
+        except ValueError:
+            if self.check_for_int(args):
+                print("Interface already exists")
+                return False
+
+            interfaces[args] = {
+                "description": "",
+                "ip_address": "",
+                "type": "",
+                "vlan": 0,
+                "proto_state": "down",
+                "int_state": "down",
+                "bandwidth": "1000M"
+            }
+
+    def do_update_interface(self, args):
+        """update_interface <command> <data> where <command> is one of:
+        description <description>
+        type <type>
+        bandwidth <bandwidth>
+        ip_address <ip_address>
+        vlan <vlan>
+        proto_state <up/down>
+        int_state <up/down>"""
+
+        commands = [
+            'description',
+            'type',
+            'bandwidth',
+            'ip_address',
+            'vlan',
+            'proto_state',
+            'int_state'
+        ]
+
+        try:
+            int, command, data = args.split(None, 2)
+            if not self.check_for_int(int):
+                print("Interface does not exist")
+                return False
+            elif command not in commands:
+                print("Command does not exist")
+                return False
+        except ValueError:
+            print("""update_interface <command> <data> where <command> is one of:
+            description <description>
+            type <type>
+            bandwidth <bandwidth>
+            ip_address <ip_address>
+            vlan <vlan>
+            proto_state <up/down>
+            int_state <up/down>""")
+            return False
+
+        try:
+            int, sub_int = int.split('.')
+            interfaces[int]['sub_interfaces'][sub_int][command] = data
+            return True
+        except ValueError:
+            interfaces[int][command] = data
+
+    def do_delete_interface(self, args):
+        'delete_interface <interface>.[sub_interface]'
+        if not self.check_for_int(args):
+            print("Interface does not exist")
+            return False
+
+        for xconnect in xconnects:
+            for key, value in xconnects[xconnect].items():
+                if args in value:
+                    print("Interface is part of an xconnect")
+                    return False
+
+        try:
+            int, sub_int = args.split('.')
+        except ValueError:
+            int = args
+
+        interfaces.pop(int)
+
+
     def do_show_device(self, args):
         "Show system info"
         print("Hostname" + socket.gethostname())
         print("OS: " + platform.system())
         print("Release: " + platform.release())
-        print("Version: Ubuntu 16.04 LTS")
+        print("Version: " + str(platform.platform()))
         print("Machine: " + platform.machine())
         print("Processor: " + platform.processor())
 
