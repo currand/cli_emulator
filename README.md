@@ -1,4 +1,7 @@
-A simple CLI emulator to use when playing with Blue Planet. It has all of the CRUDL functions and a "show device" type function. Requires Python 3.
+A simple CLI emulator to use when playing with Blue Planet. It has many of the CRUDL functions used on a generic router and a "show device" type function. Requires Python 3.
+
+
+
 
 ```
 currand@M_C02N72W0G3QK_fake$ help

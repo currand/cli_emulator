@@ -303,7 +303,7 @@ class Shell(cmd.Cmd):
 
     def do_show_device(self, args):
         "Show system info"
-        print("Hostname" + socket.gethostname())
+        print("Hostname: " + socket.gethostname())
         print("OS: " + platform.system())
         print("Release: " + platform.release())
         print("Version: " + str(platform.platform()))
