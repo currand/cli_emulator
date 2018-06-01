@@ -18,7 +18,7 @@ version = "0.9"
 ipadd_pattern = re.compile('\b(?:\d{1,3}\.){3}\d{1,3}\b')
 
 interfaces = {
-    "ge-1/0/2": {
+    "ge-1/0/1": {
         "description": "CKT ETH/12345/A",
         "sub_interfaces": {
             "10": {
@@ -41,7 +41,7 @@ interfaces = {
             }
         }
     },
-    "ge-1/0/1": {
+    "ge-1/0/2": {
         "description": "CKT ETH/45678/QZ",
         "sub_interfaces": {
             "10": {
@@ -147,6 +147,21 @@ class Shell(cmd.Cmd):
         print(template.render(xconnects=xconnects))
 
         return True
+
+    def do_show_xconnect(self, args):
+        'show_xconnect <name>'
+
+        data = {}
+
+        if args in xconnects.keys():
+            data[args] = xconnects[args]
+            template = jinja_env.get_template('show-xconnects.tmpl')
+            print(template.render(xconnects=data))
+
+            return True
+        else:
+            print("Xconnect does not exist")
+            return False
 
     def do_delete_xconnect(self,args):
         'delete_xconnect <xconnect>'
