@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import cmd
 import sys
 import getpass
@@ -330,7 +328,6 @@ class Shell(cmd.Cmd):
         sys.exit()
 
     def precmd(self, line):
-        line = line.lower()
         return line
 
     def postcmd(self, stop, line):
