@@ -98,7 +98,7 @@ xconnects = {
 xconnect_hash = {}
 
 
-class Shell(cmd.Cmd):
+class Shell(cmd.Cmd, object):
     intro = "\n\nTest shell " + version +\
         """\n  by: David Curran (david.curran@ftr.com)\n\
   Type 'help' to see a list of commands\n"""
