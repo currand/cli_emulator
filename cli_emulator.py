@@ -105,9 +105,9 @@ class Shell(cmd.Cmd):
 
     prompt = getpass.getuser() + "@" + socket.gethostname() + "_fake$ "
     completekey = 'tab'
-    
+
     def __init__(self):
-        super().__init__()
+        super(Shell, self).__init__()
         self.configfile = None
 
     def check_for_int(self, interface):
@@ -122,30 +122,30 @@ class Shell(cmd.Cmd):
                 return False
         except (ValueError, KeyError):
             return False
-    
+
     def save_config(self):
         'save the current config to a file'
         if self.configfile is None:
             print("No configfile set")
             return False
-        
+
         with open(self.configfile, 'wb') as fh:
             pickle.dump((interfaces, xconnects, xconnect_hash), fh)
-            
+
     def read_config(self):
         'read a config from a file'
         global interfaces
         global xconnects
         global xconnect_hash
-        
+
         if self.configfile is not None:
             with open(self.configfile, 'rb') as fh:
                 input_data = pickle.load(fh)
-            
+
             interfaces = input_data[0]
             xconnects = input_data[1]
             xconnect_hash = input_data[2]
-                    
+
     def do_set_configfile(self, args):
         'create an output file <filename>'
 
