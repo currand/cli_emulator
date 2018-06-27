@@ -3,7 +3,9 @@ import sys
 import getpass
 import socket
 import platform
+import pickle
 import re
+import os.path
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 jinja_env = Environment(
@@ -101,26 +103,62 @@ class Shell(cmd.Cmd):
 
     prompt = getpass.getuser() + "@" + socket.gethostname() + "_fake$ "
     completekey = 'tab'
+    
+    def __init__(self):
+        super().__init__()
+        self.configfile = None
 
-    def check_for_int(self, int):
-        if int in interfaces.keys():
+    def check_for_int(self, interface):
+        if interface in interfaces.keys():
             return True
 
         try:
-            int, sub_int = int.split('.')
-            if sub_int in interfaces[int]['sub_interfaces'].keys():
+            interface, sub_int = interface.split('.')
+            if sub_int in interfaces[interface]['sub_interfaces'].keys():
                 return True
             else:
                 return False
         except (ValueError, KeyError):
             return False
+    
+    def save_config(self):
+        'save the current config to a file'
+        if self.configfile is None:
+            print("No configfile set")
+            return False
+        
+        with open(self.configfile, 'wb') as fh:
+            pickle.dump((interfaces, xconnects, xconnect_hash), fh)
+            
+    def read_config(self):
+        'read a config from a file'
+        global interfaces
+        global xconnects
+        global xconnect_hash
+        
+        if self.configfile is not None:
+            with open(self.configfile, 'rb') as fh:
+                input_data = pickle.load(fh)
+            
+            interfaces = input_data[0]
+            xconnects = input_data[1]
+            xconnect_hash = input_data[2]
+                    
+    def do_set_configfile(self, args):
+        'create an output file <filename>'
+
+        if os.path.isfile(args):
+            self.configfile = args
+            self.read_config()
+        else:
+            self.configfile = args
 
     def do_create_xconnect(self, args):
-        'create_xconnect <source> <dest> <type> <name>'
+        'create_xconnect <source> <dest> <xc_type> <name>'
         try:
-            source, dest, type, name = args.split(None)
+            source, dest, xc_type, name = args.split(None)
         except ValueError:
-            print('create_xconnect <source> <dest> <type> <name>')
+            print('create_xconnect <source> <dest> <xc_type> <name>')
             return False
 
         if not self.check_for_int(source) or not self.check_for_int(dest):
@@ -128,14 +166,14 @@ class Shell(cmd.Cmd):
                 print('source/destination must be valid interface or IP Address')
                 return False
 
-        if type not in ['mpls', 'vlan']:
-            print('type must be one of [vlan, mpls]')
+        if xc_type not in ['mpls', 'vlan']:
+            print('xc_type must be one of [vlan, mpls]')
             return False
 
         xconnects[name] = {
             "source-int": source,
             "dest-int": dest,
-            "type": type
+            "xc_type": xc_type
         }
 
         return True
@@ -175,29 +213,29 @@ class Shell(cmd.Cmd):
         sub_int = False
         try:
             if '.' in args:
-                int, sub_int = args.split('.')
+                interface, sub_int = args.split('.')
             else:
-                int = args
+                interface = args
         except ValueError:
             'do_show_interface <interface>[.sub-interface]'
 
-        if int not in interfaces.keys():
-            print("Interface {} not found".format(int))
+        if interface not in interfaces.keys():
+            print("Interface {} not found".format(interface))
             return False
-        if sub_int and sub_int not in interfaces[int]["sub_interfaces"].keys():
-            print("Interface {}.{} not found".format(int, sub_int))
+        if sub_int and sub_int not in interfaces[interface]["sub_interfaces"].keys():
+            print("Interface {}.{} not found".format(interface, sub_int))
             return False
 
         template = jinja_env.get_template('show_interface.tmpl')
-        print(template.render(int=int, sub_int=sub_int, interfaces=interfaces))
+        print(template.render(interface=interface, sub_int=sub_int, interfaces=interfaces))
         return True
 
     def do_show_interfaces(self, args):
         'Show all interfaces'
         template = jinja_env.get_template('show_interface.tmpl')
 
-        for int in interfaces:
-            print(template.render(int=int, sub_int=False,
+        for interface in interfaces:
+            print(template.render(interface=interface, sub_int=False,
                                   interfaces=interfaces))
 
         return True
@@ -210,12 +248,12 @@ class Shell(cmd.Cmd):
             return False
 
         try:
-            int, sub_int = args.split('.')
+            interface, sub_int = args.split('.')
             if self.check_for_int(args):
                 print("Interface already exists")
                 return False
 
-            interfaces[int] = {
+            interfaces[interface] = {
                 "description": "",
                 "sub_interfaces": {
                     sub_int: {
@@ -269,8 +307,8 @@ class Shell(cmd.Cmd):
         ]
 
         try:
-            int, command, data = args.split(None, 2)
-            if not self.check_for_int(int):
+            interface, command, data = args.split(None, 2)
+            if not self.check_for_int(interface):
                 print("Interface does not exist")
                 return False
             elif command not in commands:
@@ -288,11 +326,11 @@ class Shell(cmd.Cmd):
             return False
 
         try:
-            int, sub_int = int.split('.')
-            interfaces[int]['sub_interfaces'][sub_int][command] = data
+            interface, sub_int = interface.split('.')
+            interfaces[interface]['sub_interfaces'][sub_int][command] = data
             return True
         except ValueError:
-            interfaces[int][command] = data
+            interfaces[interface][command] = data
 
     def do_delete_interface(self, args):
         'delete_interface <interface>.[sub_interface]'
@@ -307,11 +345,11 @@ class Shell(cmd.Cmd):
                     return False
 
         try:
-            int, sub_int = args.split('.')
+            interface, sub_int = args.split('.')
         except ValueError:
-            int = args
+            interface = args
 
-        interfaces.pop(int)
+        interfaces.pop(interface)
 
 
     def do_show_device(self, args):
@@ -324,6 +362,7 @@ class Shell(cmd.Cmd):
         print("Processor: " + platform.processor())
 
     def do_exit(self, arg):
+        self.save_config()
         print("Goodbye...")
         sys.exit()
 
@@ -331,6 +370,7 @@ class Shell(cmd.Cmd):
         return line
 
     def postcmd(self, stop, line):
+        self.save_config()
         print()
 
 

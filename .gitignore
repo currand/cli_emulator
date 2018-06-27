@@ -1,2 +1,6 @@
 .pyc
-./__pycache__
+.pydevproject
+.project
+*.txt
+*.conf
+/__pycache__
