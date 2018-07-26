@@ -1,4 +1,4 @@
-interface {{ interface }}{% if sub_int %}.{{ sub_int }}{% endif %}
+interface {{ interface }}
   Description: {{ interfaces[interface]['description'] }}{% if sub_int %}
   Logical interface: {{ sub_int }}
     Description: {{ interfaces[interface]['sub_interfaces'][sub_int]['description'] }}

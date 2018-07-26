@@ -214,19 +214,15 @@ class Shell(cmd.Cmd, object):
 
         sub_int = False
         try:
-            if '.' in args:
-                interface, sub_int = args.split('.')
-            else:
-                interface = args
-        except ValueError:
-            'do_show_interface <interface>[.sub-interface]'
-
-        if interface not in interfaces.keys():
-            print("Interface {} not found".format(interface))
-            return False
-        if sub_int and sub_int not in interfaces[interface]["sub_interfaces"].keys():
-            print("Interface {}.{} not found".format(interface, sub_int))
-            return False
+            interface, sub_int = args.split('.')
+            if sub_int not in interfaces[interface]["sub_interfaces"].keys():
+                print("Interface {}.{} not found".format(interface, sub_int))
+                return False
+        except (ValueError, KeyError):
+            interface = args
+            if interface not in interfaces.keys():
+                print("Interface {} not found".format(interface))
+                return False
 
         template = jinja_env.get_template('show_interface.tmpl')
         print(template.render(interface=interface, sub_int=sub_int, interfaces=interfaces))
