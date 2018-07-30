@@ -87,11 +87,6 @@ xconnects = {
         "source-int": "ge-1/0/1.11",
         "dest-int": "ge-1/0/2.10",
         "type": "vlan",
-    },
-    "offnet-vpn": {
-        "source-int": "10.1.1.1",
-        "dest-int": "ge-1/0/2.10",
-        "type": "mpls"
     }
 }
 
