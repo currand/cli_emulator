@@ -170,7 +170,7 @@ class Shell(cmd.Cmd, object):
         xconnects[name] = {
             "source-int": source,
             "dest-int": dest,
-            "xc_type": xc_type
+            "type": xc_type
         }
 
         return True
