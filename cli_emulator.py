@@ -339,10 +339,11 @@ class Shell(cmd.Cmd, object):
 
         try:
             interface, sub_int = args.split('.')
+            interfaces[interface]['sub_interfaces'].pop(sub_int)
         except ValueError:
-            interface = args
+            interfaces.pop(interface)
 
-        interfaces.pop(interface)
+        
 
 
     def do_show_device(self, args):
