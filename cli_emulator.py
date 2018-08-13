@@ -341,6 +341,7 @@ class Shell(cmd.Cmd, object):
             interface, sub_int = args.split('.')
             interfaces[interface]['sub_interfaces'].pop(sub_int)
         except ValueError:
+            interface = args
             interfaces.pop(interface)
 
         
